@@ -1,0 +1,20 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t sotkou/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run -e CI=true USERNAME/react-test npm test
+
+after_success:
+  - docker build -t sotkou/multi-client ./client
+  - docker build -t sotkou/multi-nginx ./nginx
+  - docker build -t sotkou/multi-server ./server
+  - docler build -t sotkou/multi-worker ./worker
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  - docker push sotkou/multi-client
+  - docker push sotkou/multi-nginx
+  - docker push sotkou/multi-server
+  - docler push sotkou/multi-worker
